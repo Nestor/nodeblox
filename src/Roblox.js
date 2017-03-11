@@ -11,8 +11,8 @@ module.exports = class Roblox {
 
 		this.username 	= obj.username;
 		this.password 	= obj.password;
-		this.jar		= obj.jar 		|| defaults.jar;
-		this.proxy 		= obj.proxy 	|| defaults.proxy;
+		this.jar	= obj.jar 	|| defaults.jar;
+		this.proxy 	= obj.proxy 	|| defaults.proxy;
 		this.retries 	= obj.retries 	|| defaults.retries;
 		this.logged_in 	= undefined;
 
