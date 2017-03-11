@@ -11,8 +11,8 @@ module.exports = class Roblox {
 
 		this.username 	= obj.username;
 		this.password 	= obj.password;
-		this.jar	= obj.jar 	|| defaults.jar;
-		this.proxy 	= obj.proxy 	|| defaults.proxy;
+		this.jar		= obj.jar 		|| defaults.jar;
+		this.proxy 		= obj.proxy 	|| defaults.proxy;
 		this.retries 	= obj.retries 	|| defaults.retries;
 		this.logged_in 	= undefined;
 
@@ -62,7 +62,6 @@ module.exports = class Roblox {
 
 			request({
 				url: "https://www.roblox.com/newlogin",
-				jar: this.jar,
 				method: 'POST',
 				form: {
 					'Username': this.username,
@@ -91,12 +90,19 @@ module.exports = class Roblox {
 	fetchLoggedIn() {
 		return new Promise((resolve, reject) => {
 			request({
-				url: 'https://www.roblox.com/my/account/json',
-				jar: this.jar,
-				followRedirect: false
+				url: 'https://www.roblox.com/home',
+				followRedirect: (response) => {
+					return response.headers.location === "https://web.roblox.com/home"
+				}
 			}, (err, resp, body) => {
 				if(err) reject(err);
+				if(resp.statusCode == 200) {
+					this.token = Roblox.parseTokenFromHtml(body);
+					this.logged_in = true;
+				}
 
+				resolve(resp.statusCode == 200);
+				
 			});
 		});
 	}
@@ -104,11 +110,82 @@ module.exports = class Roblox {
 	fetchSettings() {
 		return new Promise((resolve, reject) => {
 			request({
-				url: "https://www.roblox.com/my/settings/json"
+				url: "https://www.roblox.com/my/settings/json",
+				followAllRedirects: true,
+				followRedirect: (response) => {
+					return response.headers.location === "https://web.roblox.com/my/settings/json";
+				}
 			}, (err, resp, body) => {
 				if(err) reject(err);
+				if(resp.statusCode != 200) return reject('Tried to fetch settings while not logged in.');
+				
+				resolve( JSON.parse(body) );
+			});
+		});
+	}
+
+	// Group functions
+
+	fetchGroupFunds(group_id) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: `https://www.roblox.com/my/groupadmin.aspx?gid=${group_id}`,
+				followRedirect: (response) => {
+					return response.headers.location === `https://web.roblox.com/my/groupadmin.aspx?gid=${group_id}`;
+				},
+				followAllRedirects: true
+			}, (err, resp, body) => {
+				let matches = body.match(/Group Funds:[\s\S]*?<span class=\'robux\'>([\s\S]*?)<\/span>/);
+				return (matches && matches[1]) ? resolve(matches[1]) : reject('Group Admin disallowed for given group.');
+			});
+		});
+	}
+
+	fetchGroupJoinRequests(group_id) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: `https://www.roblox.com/my/groupadmin.aspx?gid=${group_id}`,
+				followRedirect: (response) => {
+					return response.headers.location === `https://web.roblox.com/my/groupadmin.aspx?gid=${group_id}`;
+				},
+				followAllRedirects: true
+			}, (err, resp, body) => {
+				if(err) reject(err);
+				if(resp.statusCode != 200) reject('Group Admin disallowed for given group.');
+
+				let regexp = /data-rbx-join-request="(.*?)" class="btn-control btn-control-medium accept-join-request">Accept<\/span>/g;
+				let join_requests = [];
+				let matches = body.match(regexp);
+				for (var i = 0; i < matches.length; i++) {
+					join_requests.push(matches[i].replace(/\D/g, ""));
+				}
+
+				let roblox_users = [];
+				regexp = /<td><a href="https:\/\/(?:web|www)\.roblox\.com\/users\/(.*?)\/.*?<\/td>/g;
+				matches = body.match(regexp);
+				for (var i = 0; i < matches.length; i++) {
+					roblox_users.push(matches[i].replace(/">.*?<\/a/g, "").replace(/\D/g, ""));
+				}
+
+				resolve(_.zipObject(roblox_users, join_requests));
+			});
+		});
+	}
+
+	acceptGroupJoinRequest(request_id) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: "https://www.roblox.com/group/handle-join-request",
+				method: 'POST',
+				headers: {
+					'X-CSRF-TOKEN': this.token
+				},
+				form: {
+					groupJoinRequestId: request_id
+				}
+			}, (err, resp, body) => {
 				console.log(body);
-				resolve(body);
+				console.log(resp.statusCode);
 			});
 		});
 	}
