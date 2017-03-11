@@ -1,4 +1,4 @@
-const request = require('request');
+var request = require('request');
 const RobloxException = require('./errors/RobloxError');
 const _ = require('lodash');
 
@@ -16,7 +16,11 @@ module.exports = class Roblox {
 		this.retries 	= obj.retries 	|| defaults.retries;
 		this.logged_in 	= undefined;
 
-		console.log(this);
+		request = request.defaults({
+			jar: this.jar,
+			proxy: this.proxy,
+			timeout: 4000
+		});
 
 		if(!_.isUndefined(obj.cookie)) {
 			let cookie = request.cookie(`.ROBLOSECURITY=${obj.cookie}`);
@@ -27,14 +31,16 @@ module.exports = class Roblox {
 	static defaults() {
 		return {
 			jar: request.jar(),
-			proxy: null,
-			token: null,
+			proxy: undefined,
+			token: undefined,
 			retries: 1,
 			fetchProxy: () => {
 				throw new RobloxError('fetchProxy not defined within constructor.');
 			}
 		}
 	}
+
+	// Object get/set methods
 
 	get cookie() {
 		return (this.jar._jar.store.idx["roblox.com"] &&
@@ -43,6 +49,12 @@ module.exports = class Roblox {
 				) ? this.jar._jar.store.idx["roblox.com"]["/"][".ROBLOSECURITY"].value
 				  : "";
 	}
+
+	/*
+	*	ROBLOX-interfacing code.
+	*/
+
+	// account functions
 
 	login() {
 		return new Promise((resolve, reject) => {
@@ -60,7 +72,6 @@ module.exports = class Roblox {
 				followAllRedirects: true,
 				followRedirect: (resp) => {
 					if(resp.headers.location) redirects.push(resp.headers.location);
-					console.log(redirects);
 					return true;
 				}
 			}, (err, resp, body) => {
@@ -69,10 +80,35 @@ module.exports = class Roblox {
 				if(redirects[0] == "/home?nl=true" || redirects[0] == "/home") {
 					this.token = Roblox.parseTokenFromHtml(body);
 					this.logged_in = true;
-					return resolve(this);
+					return resolve(true);
 				}
 
-				return reject(false);
+				return resolve(false);
+			});
+		});
+	}
+
+	fetchLoggedIn() {
+		return new Promise((resolve, reject) => {
+			request({
+				url: 'https://www.roblox.com/my/account/json',
+				jar: this.jar,
+				followRedirect: false
+			}, (err, resp, body) => {
+				if(err) reject(err);
+
+			});
+		});
+	}
+
+	fetchSettings() {
+		return new Promise((resolve, reject) => {
+			request({
+				url: "https://www.roblox.com/my/settings/json"
+			}, (err, resp, body) => {
+				if(err) reject(err);
+				console.log(body);
+				resolve(body);
 			});
 		});
 	}
