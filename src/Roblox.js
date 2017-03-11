@@ -212,6 +212,106 @@ module.exports = class Roblox {
 		});
 	}
 
+	// Trading functions -- REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+
+	getTrades(type='inbound', user_id=null, index=null) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: "https://www.roblox.com/my/money.aspx/getmyitemtrades",
+				method: 'POST',
+				headers: {
+					'X-CSRF-TOKEN': this.token
+				},
+				json: {
+					statustype: type,
+					startindex: (index)?index:0
+				},
+				followRedirect: false
+			}, (err, resp, body) => {
+				if(err) return reject(err);
+				if(resp.statusCode != 200) return reject('Error getting trades.');
+				
+				let trade_strings = JSON.parse(body['d'])['Data'];
+				let trades = _.map(trade_strings, val => { return JSON.parse(val) });
+				return resolve((user_id)
+					   ? _.filter(trades, { TradePartnerID: user_id.toString() })
+					   : trades);
+			});
+		});
+	}
+
+	tradeAction(trade_session, cmd, json=null) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: "https://www.roblox.com/trade/tradehandler.ashx",
+				method: 'POST',
+				headers: {
+					'X-CSRF-TOKEN': this.token
+				},
+				form: {
+					cmd: cmd,
+					TradeID: trade_session,
+					TradeJSON: json
+				}
+			}, (err, resp, body) => {
+				if(err) return reject(err);
+				if(resp.statusCode != 200) return reject(`Error ${cmd}ing trade`);
+				console.log(body);
+
+				// do separate commands have separate responses?
+				if(cmd == 'pull') return resolve( JSON.parse(JSON.parse(body)['data']) );
+				if(cmd == 'maketrade') return resolve( JSON.parse(body)["msg"] == "Trade completed!" );
+			});
+		});
+	}
+
+	sendTrade(participants, uaids) {
+		return new Promise((resolve, reject) => {
+			let json = {
+				AgentOfferList: [
+					{
+						AgentID: participants[0],
+						OfferList: [
+							{
+								UserAssetID: uaids[0]
+							}
+						],
+						OfferRobux: 0,
+						OfferValue: 1
+					},
+					{
+						AgentID: participants[1],
+						OfferList: [
+							{
+								UserAssetID: uaids[1]
+							}
+						],
+						OfferRobux: 0,
+						OfferValue: 1
+					}
+				],
+				isActive: false,
+				TradeStatus: "Open"
+			}
+			
+			request({
+				url: "https://www.roblox.com/Trade/tradehandler.ashx",
+				method: 'POST',
+				headers: {
+					'X-CSRF-TOKEN': this.token
+				},
+				form: {
+					cmd: 'send',
+					TradeJSON: JSON.stringify(json)
+				}
+			}, (err, resp, body) => {
+				if(err) return reject(err);
+				if(resp.statusCode != 200) return reject(err);
+				resolve(JSON.parse(body)['msg'] == "Trade sent!");
+			});
+		});
+	}
+
 	// Helper functions
 
 	static parseTokenFromHtml(html) {
