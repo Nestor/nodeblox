@@ -151,7 +151,7 @@ module.exports = class Roblox {
 				followAllRedirects: true
 			}, (err, resp, body) => {
 				if(err) reject(err);
-				if(resp.statusCode != 200) reject('Group Admin disallowed for given group.');
+				if(resp.statusCode != 200) return reject('Group Admin disallowed for given group.');
 
 				let regexp = /data-rbx-join-request="(.*?)" class="btn-control btn-control-medium accept-join-request">Accept<\/span>/g;
 				let join_requests = [];
@@ -184,8 +184,30 @@ module.exports = class Roblox {
 					groupJoinRequestId: request_id
 				}
 			}, (err, resp, body) => {
-				console.log(body);
-				console.log(resp.statusCode);
+				if(err) return reject(err);
+				resolve();
+			});
+		});
+	}
+
+	groupPayout(group_id, user_id, amount) {
+		return new Promise((resolve, reject) => {
+			let obj = {};
+			obj[user_id.toString()] = amount.toString();
+			request({
+				url: `https://www.roblox.com/groups/${group_id}/one-time-payout/1/false`,
+				form: {
+					percentages: JSON.stringify(obj)
+				},
+				headers: {
+					'X-CSRF-TOKEN': this.token
+				},
+				method: 'POST',
+				followAllRedirects: false,
+				followRedirect: false
+			}, (err, resp, body) => {
+				if(err) return reject(err);
+				resolve(resp.statusCode === 200);
 			});
 		});
 	}
@@ -196,7 +218,4 @@ module.exports = class Roblox {
 		let matches = html.match(/\.setToken\('(.*?)'\);/);
 		return (matches && matches[1]) ? matches[1] : false;
 	}
-
-
-
 }
