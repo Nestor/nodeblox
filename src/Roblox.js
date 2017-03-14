@@ -4,8 +4,8 @@ var request = require('request');
 const RobloxException = require('./errors/RobloxError');
 const _ = require('lodash');
 
-const InventoryAPI = require('./api/inventory');
-const UserAPI = require('./api/users');
+const InventoryAPI = require('./apis/inventory');
+const UserAPI = require('./apis/users');
 exports.UserAPI = UserAPI;
 exports.InventoryAPI = InventoryAPI;
 
