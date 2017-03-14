@@ -221,7 +221,9 @@ exports.Roblox = class Roblox {
 
 	// Trading functions -- REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
-	getTrades(type='inbound', user_id=null, index=null) {
+	getTrades(type, user_id, index) {
+		if(!type) type = 'inbound';
+
 		return new Promise((resolve, reject) => {
 			request({
 				url: "https://www.roblox.com/my/money.aspx/getmyitemtrades",
@@ -247,7 +249,7 @@ exports.Roblox = class Roblox {
 		});
 	}
 
-	tradeAction(trade_session, cmd, json=null) {
+	tradeAction(trade_session, cmd, json) {
 		return new Promise((resolve, reject) => {
 			request({
 				url: "https://www.roblox.com/trade/tradehandler.ashx",
