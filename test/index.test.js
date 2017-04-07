@@ -1,6 +1,5 @@
 const expect = require("chai").expect
 
-const Roblox = require("../src/Roblox")
 
 describe("Roblox", () => {
     let roblox // global test object
@@ -19,7 +18,7 @@ describe("Roblox", () => {
 
         it("should set cookie", () => {
             expect(roblox.cookie).to.not.be.empty
-        })    
+        })
     })
 
     describe("User", () => {

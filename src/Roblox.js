@@ -63,6 +63,16 @@ exports.Roblox = class Roblox {
 
 	// account functions
 
+	checkIp() {
+		return new Promise((resolve, reject) => {
+			request({
+				url: 'https://api.ipify.org?format=json'
+			}, (err, resp, body) => {
+				console.log(body)
+			})
+		})
+	}
+
 	login() {
 		return new Promise((resolve, reject) => {
 			let redirects = [];
