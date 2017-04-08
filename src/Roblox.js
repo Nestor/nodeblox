@@ -32,8 +32,8 @@ exports.Roblox = class Roblox {
 		});
 
 		if(!_.isUndefined(obj.cookie)) {
-			let cookie = request.cookie(`.ROBLOSECURITY=${obj.cookie}`);
-			this.jar.setCookie(cookie, 'https://roblox.com/');
+			let cookie = request.cookie(`.ROBLOSECURITY=${obj.cookie}; Domain=.roblox.com; HostOnly=false`);
+			this.jar.setCookie(cookie, 'http://roblox.com');
 		}
 	}
 
