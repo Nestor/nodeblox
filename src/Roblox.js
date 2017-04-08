@@ -321,6 +321,15 @@ exports.Roblox = class Roblox {
 		});
 	}
 
+
+	checkIp() {
+		request({
+			url: "https://api.ipify.com/?format=json"
+		}, function(err, resp, body) {
+			console.log(body)
+		})
+	}
+
 	// Helper functions
 
 	static parseTokenFromHtml(html) {
