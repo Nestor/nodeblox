@@ -7,9 +7,11 @@ const _ = require('lodash');
 const InventoryAPI = require('./apis/inventory');
 const UserAPI = require('./apis/users');
 const GroupAPI = require('./apis/groups');
+const MarketAPI = require('./api/market')
 exports.UserAPI = UserAPI;
 exports.InventoryAPI = InventoryAPI;
 exports.GroupAPI = GroupAPI;
+exports.MarketAPI = MarketAPI;
 
 exports.Roblox = class Roblox {
 
