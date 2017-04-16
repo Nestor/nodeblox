@@ -6,12 +6,12 @@ var API = {
 			request({
 				url: `https://api.roblox.com/marketplace/productinfo?assetid=${asset_id}`
 			}, function (err, resp, body) {
-				if(err) reject(err)
+				if(err) return reject(err)
 
-				let json = JSON.parse(body)
-				if(json.errors) reject( new Error("Invalid assetId") )
+				var json = JSON.parse(body)
+				if(json.errors) return reject( new Error("Invalid assetId") )
 
-				return json
+				resolve(json)
 			})
 		})
 	}
