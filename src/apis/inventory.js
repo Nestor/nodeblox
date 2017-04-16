@@ -7,6 +7,7 @@ var API = {
 			var types = [8,18,19,41,42,43,44,45,46,47];
 			var left = types.length;
 			var inventory = [];
+            var rap = 0;
 			for (var i = 0; i < types.length; i++) {
 				getPage(types[i]);
 			}
