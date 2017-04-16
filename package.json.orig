@@ -1,13 +1,17 @@
 {
   "name": "nodeblox",
-  "version": "1.0.6",
+  "version": "1.0.11",
   "description": "",
   "main": "src/Roblox.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
+<<<<<<< HEAD
+    "axios": "^0.15.3",
+=======
     "axios": "^0.16.1",
+>>>>>>> 8c66814955a5a1b68229768be19f401eef4c96d2
     "lodash": "^4.17.4",
     "request": "^2.81.0"
   },

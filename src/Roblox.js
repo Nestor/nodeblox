@@ -32,8 +32,8 @@ exports.Roblox = class Roblox {
 		});
 
 		if(!_.isUndefined(obj.cookie)) {
-			let cookie = request.cookie(`.ROBLOSECURITY=${obj.cookie}`);
-			this.jar.setCookie(cookie, 'https://roblox.com/');
+			let cookie = request.cookie(`.ROBLOSECURITY=${obj.cookie}; Domain=.roblox.com; HostOnly=false`);
+			this.jar.setCookie(cookie, 'http://roblox.com');
 		}
 	}
 
@@ -329,6 +329,15 @@ exports.Roblox = class Roblox {
 				resolve(JSON.parse(body)['msg'] == "Trade sent!");
 			});
 		});
+	}
+
+
+	checkIp() {
+		request({
+			url: "https://api.ipify.org/?format=json"
+		}, function(err, resp, body) {
+			console.log(body)
+		})
 	}
 
 	// Helper functions
