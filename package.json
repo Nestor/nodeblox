@@ -9,6 +9,8 @@
   "dependencies": {
     "axios": "^0.16.1",
     "lodash": "^4.17.4",
+    "node-png": "^0.4.3",
+    "pngjs": "^3.0.1",
     "request": "^2.81.0"
   },
   "devDependencies": {},
