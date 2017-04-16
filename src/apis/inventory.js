@@ -13,7 +13,7 @@ var API = {
 
 			function getPage(type, cursor, tries) {
                 if(!tries) tries = 1;
-				request.get('https://inventory.roblox.com/v1/users/' + roblox_user_id + '/assets/collectibles?limit=100&assetType=' + type.toString() + ((cursor)?'':'&cursor=' + cursor), {timeout:5000}, function(err, resp, body) {
+				request.get('https://inventory.roblox.com/v1/users/' + user_id + '/assets/collectibles?limit=100&assetType=' + type.toString() + ((cursor)?'':'&cursor=' + cursor), {timeout:5000}, function(err, resp, body) {
 					if(err) { return ((tries == 3)?complete(type):getPage(type, cursor, tries+1)); }
 					json = JSON.parse(body);
 					if(json.errors) { return complete(type); }
@@ -50,7 +50,7 @@ var API = {
                         data: inventory
                     });
                 }
-            }          
+            }
         })
     },
     getAssetOwners: (asset_id) => {
