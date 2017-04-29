@@ -1,5 +1,4 @@
 const request = require('request')
-const png = require('pngjs').PNG
 
 var API = {
 	fetchAssetInfo: (asset_id) => {

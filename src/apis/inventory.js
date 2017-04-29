@@ -5,6 +5,18 @@ var API = {
 	getInventory: (user_id) => {
 		return new Promise((resolve, reject) => {
 			var types = [8,18,19,41,42,43,44,45,46,47];
+			var typeDict = {
+				'8': 'hat',
+				'18': 'face',
+				'19': 'gear',
+				'41': 'hat',
+				'42': 'hat',
+				'43': 'hat',
+				'44': 'hat',
+				'45': 'hat',
+				'46': 'hat',
+				'47': 'hat'
+			}
 			var left = types.length;
 			var inventory = [];
 			var rap = 0;
@@ -19,13 +31,13 @@ var API = {
 					json = JSON.parse(body);
 
 					if(json.errors) { return complete(type); }
-					if(json.nextPageCursor == null) { return push(json.data, () => { complete(type); }) }
+					if(json.nextPageCursor == null) { return push(json.data, type, () => { complete(type); }) }
 
-					push(json.data, () => { getPage(type, json.nextPageCursor); });
+					push(json.data, type, () => { getPage(type, json.nextPageCursor); });
 				});
 			}
 
-			function push(json, cb) {
+			function push(json, type, cb) {
 				var left_to_process = json.length;
 				if(left_to_process == 0) return cb();
 
@@ -38,7 +50,8 @@ var API = {
 						id: item.assetId,
 						serial: item.serialNumber,
 						assetStock: item.assetStock,
-						serialNumber: item.serialNumber
+						serialNumber: item.serialNumber,
+						type: typeDict[type.toString()]
 					});
 					if(!--left_to_process) {
 						cb();
