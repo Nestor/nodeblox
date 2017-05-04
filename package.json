@@ -1,6 +1,6 @@
 {
   "name": "nodeblox",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "",
   "main": "src/Roblox.js",
   "directories": {
