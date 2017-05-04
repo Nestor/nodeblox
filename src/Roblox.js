@@ -1,7 +1,6 @@
 'use strict';
 
 var request = require('request');
-const RobloxException = require('./errors/Error');
 const _ = require('lodash');
 
 const InventoryAPI = require('./apis/inventory');
