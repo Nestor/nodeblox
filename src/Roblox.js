@@ -1,7 +1,7 @@
 'use strict';
 
 var request = require('request');
-const RobloxException = require('./errors/RobloxError');
+const RobloxException = require('./errors/Error');
 const _ = require('lodash');
 
 const InventoryAPI = require('./apis/inventory');
@@ -46,7 +46,7 @@ exports.Roblox = class Roblox {
 			token: undefined,
 			retries: 1,
 			fetchProxy: () => {
-				throw new RobloxError('fetchProxy not defined within constructor.');
+				throw new Error('fetchProxy not defined within constructor.');
 			}
 		}
 	}
@@ -138,7 +138,7 @@ exports.Roblox = class Roblox {
 				}
 			}, (err, resp, body) => {
 				if(err) reject(err);
-				if(resp.statusCode != 200) return reject(new RobloxError('Tried to fetch settings while not logged in.'));
+				if(resp.statusCode != 200) return reject(new Error('Tried to fetch settings while not logged in.'));
 
 				resolve( JSON.parse(body) );
 			});
@@ -157,7 +157,7 @@ exports.Roblox = class Roblox {
 				followAllRedirects: true
 			}, (err, resp, body) => {
 				let matches = body.match(/Group Funds:[\s\S]*?<span class=\'robux\'>([\s\S]*?)<\/span>/);
-				return (matches && matches[1]) ? resolve(matches[1]) : reject(new RobloxError('Group Admin disallowed for given group.'));
+				return (matches && matches[1]) ? resolve(matches[1]) : reject(new Error('Group Admin disallowed for given group.'));
 			});
 		});
 	}
@@ -172,7 +172,7 @@ exports.Roblox = class Roblox {
 				followAllRedirects: true
 			}, (err, resp, body) => {
 				if(err) reject(err);
-				if(resp.statusCode != 200) return reject(new RobloxError('Group Admin disallowed for given group.'));
+				if(resp.statusCode != 200) return reject(new Error('Group Admin disallowed for given group.'));
 
 				let regexp = /data-rbx-join-request="(.*?)" class="btn-control btn-control-medium accept-join-request">Accept<\/span>/g;
 				let join_requests = [];
@@ -252,7 +252,7 @@ exports.Roblox = class Roblox {
 				followRedirect: false
 			}, (err, resp, body) => {
 				if(err) return reject(err);
-				if(resp.statusCode != 200) return reject(new RobloxError('Error getting trades.'));
+				if(resp.statusCode != 200) return reject(new Error('Error getting trades.'));
 
 				let trade_strings = JSON.parse(body['d'])['Data'];
 				let trades = _.map(trade_strings, val => { return JSON.parse(val) });
@@ -278,7 +278,7 @@ exports.Roblox = class Roblox {
 				}
 			}, (err, resp, body) => {
 				if(err) return reject(err);
-				if(resp.statusCode != 200) return reject(new RobloxError(`Error ${cmd}ing trade`));
+				if(resp.statusCode != 200) return reject(new Error(`Error ${cmd}ing trade`));
 				// do separate commands have separate responses?
 				if(cmd == 'pull') return resolve( JSON.parse(JSON.parse(body)['data']) );
 				if(cmd == 'maketrade') return resolve( JSON.parse(body)["msg"] == "Trade completed!" );
@@ -327,7 +327,7 @@ exports.Roblox = class Roblox {
 				}
 			}, (err, resp, body) => {
 				if(err) return reject(err);
-				if(resp.statusCode != 200) return reject(new RobloxError('Request failed.'));
+				if(resp.statusCode != 200) return reject(new Error('Request failed.'));
 				resolve(JSON.parse(body)['msg'] == "Trade sent!");
 			});
 		});
