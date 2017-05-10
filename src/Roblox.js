@@ -262,7 +262,7 @@ exports.Roblox = class Roblox {
 		});
 	}
 
-	tradeAction(trade_session, cmd, json) {
+	tradeAction(cmd, trade_session, json) {
 		return new Promise((resolve, reject) => {
 			request({
 				url: "https://www.roblox.com/trade/tradehandler.ashx",
