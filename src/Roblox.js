@@ -332,6 +332,30 @@ exports.Roblox = class Roblox {
 		});
 	}
 
+	fetchAuditKicks(group_id) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: `https://www.roblox.com/Groups/Audit.aspx?groupid=${group_id}`
+			}, (err, resp, body) => {
+				let matches = body.match(/<td class="Description"><a href="\/User\.aspx\?ID=(\d+)">(\w+)<\/a> kicked user <a href="\/User\.aspx\?ID=(\d+)">(\w+)<\/a>\.<\/td>/g)
+				let ret = _.map(matches, match => {
+					let regex = match.match(/<td class="Description"><a href="\/User\.aspx\?ID=(\d+)">(\w+)<\/a> kicked user <a href="\/User\.aspx\?ID=(\d+)">(\w+)<\/a>\.<\/td>/)
+					return {
+						admin: {
+							username: regex[2],
+							userId: Number(regex[1])
+						},
+						user: {
+							username: regex[4],
+							userId: Number(regex[3])
+						}
+					}
+				})
+
+				resolve(ret)
+			})
+		})
+	}
 
 	checkIp() {
 		request({
