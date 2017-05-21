@@ -6,14 +6,15 @@ const _ = require('lodash');
 const InventoryAPI = require('./apis/inventory');
 const UserAPI = require('./apis/users');
 const GroupAPI = require('./apis/groups');
-const MarketAPI = require('./apis/market')
+const MarketAPI = require('./apis/market');
 exports.UserAPI = UserAPI;
 exports.InventoryAPI = InventoryAPI;
 exports.GroupAPI = GroupAPI;
 exports.MarketAPI = MarketAPI;
 
-exports.Roblox = class Roblox {
+const UploadManager = require('./managers/UploadManager')
 
+exports.Roblox = class Roblox {
 	constructor(obj) {
 		let defaults = Roblox.defaults();
 		if(_.isUndefined(obj.username) || _.isUndefined(obj.password)) throw new TypeError('Username or password undefined.');
@@ -36,6 +37,8 @@ exports.Roblox = class Roblox {
 			let cookie = request.cookie(`.ROBLOSECURITY=${obj.cookie}; Domain=.roblox.com; HostOnly=false`);
 			this.jar.setCookie(cookie, 'http://roblox.com');
 		}
+
+		this.upload = new UploadManager(this)
 	}
 
 	static defaults() {
@@ -357,6 +360,78 @@ exports.Roblox = class Roblox {
 		})
 	}
 
+	joinGroup(groupId) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: `https://www.roblox.com/My/Groups.aspx?gid=${groupId}`,
+				jar: this.jar
+			}, (err, resp, body) => {
+				let keys = [
+					'__VIEWSTATE',
+					'__VIEWSTATEGENERATOR',
+					'__EVENTVALIDATION',
+				]
+
+				let data = Roblox.parseValuesFromHtml(body, keys)
+				data = _.extend(data, {
+					__EVENTTARGET: 'JoinGroupDiv',
+					__EVENTARGUMENT: 'Click',
+					__LASTFOCUS: ''
+				})
+
+				request({
+					url: `https://www.roblox.com/groups/group.aspx?gid=${groupId}`,
+					method: 'post',
+					jar: this.jar,
+					form: data,
+					followRedirect: false
+				}, (err, resp, body) => {
+					resolve( resp.headers.location === `https://www.roblox.com/My/Groups.aspx?gid=${groupId}` )
+				})
+			})
+		})
+	}
+
+	leaveGroup(groupId) {
+		return new Promise((resolve, reject) => {
+			request({
+				url: `https://www.roblox.com/My/Groups.aspx?gid=${groupId}`,
+				jar: this.jar
+			}, (err, resp, body) => {
+				let keys = [
+					'__VIEWSTATE',
+					'__VIEWSTATEGENERATOR',
+					'__EVENTVALIDATION',
+					'__RequestVerificationToken'
+				]
+
+				let data = Roblox.parseValuesFromHtml(body, keys)
+				data = _.extend(data, {
+					__EVENTTARGET: '',
+					__EVENTARGUMENT: '',
+					__LASTFOCUS: '',
+					ctl00$cphRoblox$GroupSearchBar$SearchKeyword: 'Search all groups',
+					ctl00$cphRoblox$rbxGroupRoleSetMembersPane$dlRolesetList: 21153668,
+					ctl00$cphRoblox$rbxGroupRoleSetMembersPane$RolesetCountHidden: 19,
+					ctl00$cphRoblox$rbxGroupRoleSetMembersPane$dlUsers_Footer$ctl01$PageTextBox: 1,
+					ctl00$cphRoblox$rbxGroupRoleSetMembersPane$currentRoleSetID: 21153668,
+					ctl00$cphRoblox$ctl01: ''
+				})
+
+				request({
+					url: `https://www.roblox.com/My/Groups.aspx?gid=${groupId}`,
+					method: 'post',
+					jar: this.jar,
+					form: data,
+					followRedirect: false
+				}, (err, resp, body) => {
+					resolve( resp.headers.location === `https://www.roblox.com/My/Groups.aspx` )
+				})
+
+			})
+		})
+	}
+
 	checkIp() {
 		request({
 			url: "https://api.ipify.org/?format=json"
@@ -370,6 +445,15 @@ exports.Roblox = class Roblox {
 	static parseTokenFromHtml(html) {
 		let matches = html.match(/\.setToken\('(.*?)'\);/);
 		return (matches && matches[1]) ? matches[1] : false;
+	}
+
+	static parseValuesFromHtml(html, keys) {
+		let obj = _.zipObject(keys, _.map(keys, key => {
+			let matches = html.match(`name="${key}" id="${key}" value="(.*?)"`)
+			return (matches && matches[1]) ? matches[1] : false
+		}))
+
+		return obj
 	}
 }
 
