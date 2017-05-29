@@ -179,6 +179,8 @@ exports.Roblox = class Roblox {
 				let regexp = /data-rbx-join-request="(.*?)" class="btn-control btn-control-medium accept-join-request">Accept<\/span>/g;
 				let join_requests = [];
 				let matches = body.match(regexp);
+				if(!matches) return resolve({}) // if no matches, then there's no requests
+
 				for (var i = 0; i < matches.length; i++) {
 					join_requests.push(matches[i].replace(/\D/g, ""));
 				}
