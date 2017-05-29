@@ -210,7 +210,7 @@ exports.Roblox = class Roblox {
 				}
 			}, (err, resp, body) => {
 				if(err) return reject(err);
-				resolve();
+				resolve(body === '{"success":true}');
 			});
 		});
 	}
