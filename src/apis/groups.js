@@ -26,7 +26,7 @@ const GroupAPI = {
 			})
 		})
 	},
-	fetchUserInGroup: (userId, groupId) => {
+	fetchUserIsInGroup: (userId, groupId) => {
 		return new Promise((resolve, reject) => {
 			request({
 				url: `https://www.roblox.com/Game/LuaWebService/HandleSocialRequest.ashx?method=IsInGroup&playerid=${userId}&groupid=${groupId}`
