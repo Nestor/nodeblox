@@ -25,6 +25,17 @@ const GroupAPI = {
 				reject(err)
 			})
 		})
+	},
+	fetchUserInGroup: (userId, groupId) => {
+		return new Promise((resolve, reject) => {
+			request({
+				url: `https://www.roblox.com/Game/LuaWebService/HandleSocialRequest.ashx?method=IsInGroup&playerid=${userId}&groupid=${groupId}`
+			}, (err, resp, body) => {
+				if(err) return reject(err)
+
+				resolve(body === '<Value Type="boolean">true</Value>')
+			})
+		})
 	}
 }
 
