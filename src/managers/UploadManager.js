@@ -1,3 +1,5 @@
+'use strict'
+
 const request = require('request')
 const zlib = require('zlib')
 const fs = require('fs')
