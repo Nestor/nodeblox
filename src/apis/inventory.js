@@ -115,6 +115,11 @@ var API = {
 				resolve(inventory);
 			});
 		});
+	},
+	setProxy: (proxy) => {
+		request = request.defaults({
+			proxy
+		})
 	}
 }
 
