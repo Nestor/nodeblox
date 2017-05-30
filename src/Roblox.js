@@ -442,6 +442,22 @@ exports.Roblox = class Roblox {
 		})
 	}
 
+	fetchRobux() {
+		return new Promise((resolve, reject) => {
+			request({
+				url: "https://www.roblox.com/navigation/userdata"
+			}, (err, resp, body) => {
+				if(err) return reject(err)
+
+				try {
+					resolve( Number(JSON.parse(body)['CurrencyBalancesDisplay']['RobuxText']) )
+				} catch(e) {
+					reject(new Error('Not logged in'))
+				}
+			})
+		})
+	}
+
 	// Helper functions
 
 	static parseTokenFromHtml(html) {
