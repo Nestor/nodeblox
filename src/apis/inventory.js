@@ -1,4 +1,4 @@
-const request = require('request');
+let request = require('request');
 const Axios = require('axios');
 
 var API = {
@@ -120,7 +120,18 @@ var API = {
 		request = request.defaults({
 			proxy
 		})
+	},
+	checkIp() {
+		return new Promise((resolve, reject) => {
+			request({
+				url: 'https://api.ipify.org?format=json'
+			}, (err, resp, body) => {
+				if(err) return console.log(err)
+				console.log(body)
+			})
+		})
 	}
+
 }
 
 module.exports = API;
